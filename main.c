@@ -1,10 +1,66 @@
 #include <stdio.h>
 
 #include <git2.h>
-#include <git2/odb_backend.h>
-#include <git2/refdb.h>
+#include <git2/sys/odb_backend.h>
+#include <git2/sys/refdb_backend.h>
 
 #include <libpq-fe.h>
+
+#include "git2-postgresql.h"
+
+int
+git_postgresql_make_connection(PGconn **_conn, char *database_url) {
+        PGconn *conn = PQconnectdb(database_url);
+
+        if (PQstatus(conn) != CONNECTION_OK) {
+                giterr_set_str(GITERR_REFERENCE, PQerrorMessage(conn));
+                PQfinish(conn);
+                return GIT_ERROR;
+        }
+
+        *_conn = conn;
+
+        return GIT_OK;
+}
+
+int
+git_odb_backend_postgresql(git_odb_backend **backend, git_repository *repo, char *database_url, char *table) {
+        PGconn *conn;
+        int error;
+
+        error = git_postgresql_make_connection(&conn, database_url);
+
+        if (error) {
+                return error;
+        }
+
+        return git_odb_backend_postgresql_with_conn(backend, repo, conn, table);
+}
+
+int
+git_odb_backend_postgresql_with_conn(git_odb_backend **backend, git_repository *repo, PGconn *conn, char *table) {
+        return GIT_OK;
+}
+
+
+int
+git_refdb_backend_postgresql(git_refdb_backend **backend, git_repository *repo, char *database_url, char *table) {
+        PGconn *conn;
+        int error;
+
+        error = git_postgresql_make_connection(&conn, database_url);
+
+        if (error) {
+                return error;
+        }
+
+        return git_refdb_backend_postgresql_with_conn(backend, repo, conn, table);
+}
+
+int
+git_refdb_backend_postgresql_with_conn(git_refdb_backend **backend, git_repository *repo, PGconn *conn, char *table) {
+        return GIT_OK;
+}
 
 char *prog_name;
 
