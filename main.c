@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include <git2.h>
 #include <git2/sys/odb_backend.h>
@@ -24,6 +25,18 @@ git_postgresql_make_connection(PGconn **_conn, char *database_url) {
 }
 
 int
+table_exists(PGconn *conn, char *table) {
+        char *q = "SELECT COUNT(*) FROM pg_tables WHERE tablename = 'objects'";
+
+        return 0;
+}
+
+int
+create_odb_table(PGconn *conn, char *table) {
+        return 0;
+}
+
+int
 git_odb_backend_postgresql(git_odb_backend **backend, git_repository *repo, char *database_url, char *table) {
         PGconn *conn;
         int error;
@@ -39,6 +52,15 @@ git_odb_backend_postgresql(git_odb_backend **backend, git_repository *repo, char
 
 int
 git_odb_backend_postgresql_with_conn(git_odb_backend **backend, git_repository *repo, PGconn *conn, char *table) {
+        int error;
+
+        if (!table_exists(conn, table)) {
+                error = create_odb_table(conn, table);
+                if (error) {
+                        return error;
+                }
+        }
+
         return GIT_OK;
 }
 
@@ -65,12 +87,6 @@ git_refdb_backend_postgresql_with_conn(git_refdb_backend **backend, git_reposito
 char *prog_name;
 
 static void
-usage() {
-        fprintf(stderr, "usage: %s database-url\n", prog_name);
-        exit(1);
-}
-
-static void
 dieConn(PGconn *conn) {
         fprintf(stderr, "%s: %s", prog_name, PQerrorMessage(conn));
         PQfinish(conn);
@@ -93,34 +109,15 @@ main(int argc, char *argv[]) {
 
         prog_name = argv[0];
 
-        if (argc < 2) {
-                usage();
-        }
-
-        conn = PQconnectdb(argv[1]);
+        conn = PQconnectdb("postgres://localhost/libgit2-test");
 
         if (PQstatus(conn) != CONNECTION_OK) {
                 dieConn(conn);
         }
 
-        res = PQexec(conn, "SELECT * FROM objects");
+        char *s = "libgit2_odb_table; SELECT * FROM whatever WHERE thing = 'something'";
 
-        if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-                dieResult(conn, res);
-        }
-
-        int nfields = PQnfields(res);
-
-        for (i = 0; i < nfields; i++) {
-                printf("%-15s", PQfname(res, i));
-        }
-        printf("\n");
-
-        for (i = 0; i < PQntuples(res); i++) {
-                for (j = 0; j < nfields; j++)
-                        printf("%-15s", PQgetvalue(res, i, j));
-                printf("\n");
-        }
+        printf("%s\n", PQescapeLiteral(conn, s, strlen(s)));
 
         PQfinish(conn);
         return 0;

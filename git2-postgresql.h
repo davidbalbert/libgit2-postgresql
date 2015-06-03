@@ -2,14 +2,14 @@ typedef struct {
 	git_odb_backend parent;
 
         PGconn *conn;
-        char *table;
+        char *table; // Escaped. Free with PQfreemem.
 } postgresql_odb_backend;
 
 typedef struct {
         git_refdb_backend parent;
 
         PGconn *conn;
-        char *table;
+        char *table; // Escaped. Free wtih PQfreemem.
 } posgresql_refdb_backend;
 
 int git_postgresql_make_connection(PGconn **conn, char *database_url);
