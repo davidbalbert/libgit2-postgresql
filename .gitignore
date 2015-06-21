@@ -1,3 +1,5 @@
 *.d
 *.o
-main
+*.a
+*.dylib
+*.so
