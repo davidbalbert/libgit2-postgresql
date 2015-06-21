@@ -22,6 +22,18 @@ To compile against this library, you'll need to include headers for libgit2 and 
 #include <git2-postgresql.h>
 ```
 
+## Rugged bindings
+
+This repository also includes a Ruby gem that exposes the backend to Rugged, libgit2's Ruby bindings. Here's how you get started:
+
+```
+$ ruby/bin/setup
+$ ruby/bin/rake compile
+
+# To play around in a repl
+$ ruby/bin/console
+```
+
 ## License
 
 Libgit2-postgresql is copyright 2015 David Albert and is licensed under the terms of the GNU GPLv3 or any later version. See COPYING for more details.

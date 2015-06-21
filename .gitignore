@@ -3,6 +3,6 @@
 *.a
 *.dylib
 *.so
-.bundle
+*.bundle
 Gemfile.lock
 tmp
