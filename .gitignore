@@ -3,3 +3,6 @@
 *.a
 *.dylib
 *.so
+.bundle
+Gemfile.lock
+tmp
